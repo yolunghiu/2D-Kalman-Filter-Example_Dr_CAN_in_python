@@ -4,6 +4,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+np.random.seed(1)
+
 
 def gaussian_distribution_generator(var):
     return np.random.normal(loc=0.0, scale=var, size=None)
@@ -14,12 +16,18 @@ A = np.array([[1, 1],
               [0, 1]])
 
 # 过程噪声协方差矩阵Q，p(w)~N(0,Q)，噪声来自真实世界中的不确定性
+# 影响估计值
 Q = np.array([[0.1, 0],
               [0, 0.1]])
+# Q = np.array([[1, 0],
+#               [0, 1]])
 
 # 观测噪声协方差矩阵R，p(v)~N(0,R)
-R = np.array([[1, 0],
-              [0, 1]])
+# 影响测量值
+R = np.array([[0.1, 0],
+              [0, 0.1]])
+# R = np.array([[0.1, 0],
+#               [0, 0.1]])
 
 # 状态观测矩阵
 H = np.array([[1, 0],
@@ -41,15 +49,19 @@ if __name__ == "__main__":
     X_posterior = np.array(X0)
     P_posterior = np.array(P)
 
+    # 真实值
     speed_true = []
     position_true = []
 
+    # 测量值
     speed_measure = []
     position_measure = []
 
+    # 先验估计
     speed_prior_est = []
     position_prior_est = []
 
+    # 后验估计
     speed_posterior_est = []
     position_posterior_est = []
 
@@ -59,8 +71,8 @@ if __name__ == "__main__":
         w = np.array([[gaussian_distribution_generator(Q[0, 0])],
                       [gaussian_distribution_generator(Q[1, 1])]])
         X_true = np.dot(A, X_true) + w  # 得到当前时刻状态
-        speed_true.append(X_true[1, 0])
         position_true.append(X_true[0, 0])
+        speed_true.append(X_true[1, 0])
         # -----------------------生成观测值----------------------
         # 生成观测噪声
         v = np.array([[gaussian_distribution_generator(R[0, 0])],
@@ -89,11 +101,9 @@ if __name__ == "__main__":
         P_posterior_1 = np.eye(2) - np.dot(K, H)
         P_posterior = np.dot(P_posterior_1, P_prior)
 
-       
-
     # 可视化显示
     if True:
-        fig, axs = plt.subplots(1,2)
+        fig, axs = plt.subplots(1, 2)
         axs[0].plot(speed_true, "-", label="speed_true", linewidth=1)  # Plot some data on the axes.
         axs[0].plot(speed_measure, "-", label="speed_measure", linewidth=1)  # Plot some data on the axes.
         axs[0].plot(speed_prior_est, "-", label="speed_prior_est", linewidth=1)  # Plot some data on the axes.
@@ -105,7 +115,8 @@ if __name__ == "__main__":
         axs[1].plot(position_true, "-", label="position_true", linewidth=1)  # Plot some data on the axes.
         axs[1].plot(position_measure, "-", label="position_measure", linewidth=1)  # Plot some data on the axes.
         axs[1].plot(position_prior_est, "-", label="position_prior_est", linewidth=1)  # Plot some data on the axes.
-        axs[1].plot(position_posterior_est, "-", label="position_posterior_est", linewidth=1)  # Plot some data on the axes.
+        axs[1].plot(position_posterior_est, "-", label="position_posterior_est",
+                    linewidth=1)  # Plot some data on the axes.
         axs[1].set_title("position")
         axs[1].set_xlabel('k')  # Add an x-label to the axes.
         axs[1].legend()  # Add a legend.
